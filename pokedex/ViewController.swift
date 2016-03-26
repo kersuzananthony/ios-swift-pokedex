@@ -81,7 +81,9 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     }
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        let selectedPokemon: Pokemon = isInSearchMode ? filteredPokemons[indexPath.row] : pokemons[indexPath.row]
         
+        performSegueWithIdentifier("PokemonDetailVC", sender: selectedPokemon)
     }
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -103,6 +105,14 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         } else {
             musicPlayer.play()
             sender.alpha = 1.0
+        }
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "PokemonDetailVC" {
+            if let destinationVC = segue.destinationViewController as? PokemonDetailVC, pokemon = sender as? Pokemon {
+                destinationVC.pokemon = pokemon
+            }
         }
     }
 }
