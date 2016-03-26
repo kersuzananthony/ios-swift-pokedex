@@ -12,6 +12,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
 
     @IBOutlet weak var collection: UICollectionView!
     
+    var pokemons: [Pokemon] = [Pokemon]()
+    
     override func preferredStatusBarStyle() -> UIStatusBarStyle {
         return UIStatusBarStyle.LightContent
     }
@@ -22,13 +24,30 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         // Delegates
         self.collection.delegate = self
         self.collection.dataSource = self
+        
+        parsePokemonCsv()
+    }
+    
+    func parsePokemonCsv() {
+        let pokemonPath = NSBundle.mainBundle().pathForResource("pokemon", ofType: "csv")!
+        
+        do {
+            let csv = try CSV(contentsOfURL: pokemonPath)
+            let rows = csv.rows
+            
+            for row in rows {
+                let pokeId = Int(row["id"]!)!
+                let pokeName = row["identifier"]!
+                self.pokemons.append(Pokemon(name: pokeName, pokedexId: pokeId))
+            }
+        } catch let err as NSError {
+            print(err.debugDescription)
+        }
     }
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         if let cell = collectionView.dequeueReusableCellWithReuseIdentifier("PokeCell", forIndexPath: indexPath) as? PokeCell {
-            let pokemon = Pokemon(name: "Test", pokedexId: indexPath.row + 1)
-            
-            cell.configureCell(pokemon)
+            cell.configureCell(self.pokemons[indexPath.row])
             
             return cell
         } else {
