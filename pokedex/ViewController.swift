@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     @IBOutlet weak var collection: UICollectionView!
     
     var pokemons: [Pokemon] = [Pokemon]()
+    var musicPlayer: AVAudioPlayer!
     
     override func preferredStatusBarStyle() -> UIStatusBarStyle {
         return UIStatusBarStyle.LightContent
@@ -26,6 +28,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         self.collection.dataSource = self
         
         parsePokemonCsv()
+        initAudio()
     }
     
     func parsePokemonCsv() {
@@ -42,6 +45,19 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
             }
         } catch let err as NSError {
             print(err.debugDescription)
+        }
+    }
+    
+    func initAudio() {
+        let musicPath = NSBundle.mainBundle().pathForResource("pokemon_music", ofType: "mp3")!
+        
+        do {
+            musicPlayer = try AVAudioPlayer(contentsOfURL: NSURL(string: musicPath)!)
+            musicPlayer.prepareToPlay()
+            musicPlayer.numberOfLoops = -1
+            musicPlayer.play()
+        } catch let error as NSError {
+            print(error.debugDescription)
         }
     }
 
@@ -70,6 +86,16 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         return CGSizeMake(105, 105)
+    }
+    
+    @IBAction func musicButtonPressed(sender: UIButton) {
+        if musicPlayer.playing {
+            musicPlayer.stop()
+            sender.alpha = 0.2
+        } else {
+            musicPlayer.play()
+            sender.alpha = 1.0
+        }
     }
 }
 
