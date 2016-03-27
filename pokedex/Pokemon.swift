@@ -21,20 +21,108 @@ class Pokemon {
     private var _weight: String!
     private var _attack: String!
     private var _nextEvolutionText: String!
+    private var _nextEvolutionId: String!
+    private var _nextEvolutionLevel: String!
     private var _pokemonUrl: String!
     
     // Getters
-    var name: String! {
-        return _name
+    var name: String {
+        get {
+            if _name == nil {
+                _name = ""
+            }
+            
+            return _name
+        }
     }
     
-    var pokedexId: Int! {
-        return _pokedexId
+    var pokedexId: Int {
+        get {
+            if _pokedexId == nil {
+                _pokedexId = 0
+            }
+            
+            return _pokedexId
+        }
+    }
+    
+    var description: String {
+        get {
+            if _description == nil {
+                _description = ""
+            }
+            
+            return _description
+        }
+    }
+    
+    var type: String {
+        if _type == nil {
+            _type = ""
+        }
+        
+        return _type
+    }
+    
+    var defense: String {
+        if _defense == nil {
+            _defense = ""
+        }
+        
+        return _defense
+    }
+    
+    var height: String {
+        if _height == nil {
+            _height = ""
+        }
+        
+        return _height
+    }
+    
+    var weight: String {
+        if _weight == nil {
+            _weight = ""
+        }
+        
+        return _weight
+    }
+    
+    var attack: String {
+        if _attack == nil {
+            _attack = ""
+        }
+        
+        return _attack
+    }
+    
+    var nextEvolutionText: String {
+        if _nextEvolutionText == nil {
+            _nextEvolutionText = ""
+        }
+        
+        return _nextEvolutionText
+    }
+    
+    var nextEvolutionLevel: String {
+        if _nextEvolutionLevel == nil {
+            _nextEvolutionLevel = ""
+        }
+        
+        return _nextEvolutionLevel
+    }
+    
+    var nextEvolutionId: String {
+        if _nextEvolutionId == nil {
+            _nextEvolutionId = ""
+        }
+        
+         return _nextEvolutionId
     }
     
     // Initializer
     init(name: String, pokedexId: Int) {
-        self._name = name
+        self._name = name.capitalizedString
         self._pokedexId = pokedexId
         
         self._pokemonUrl = "\(URL_BASE)\(URL_POKEMON)\(self._pokedexId)/"
@@ -77,7 +165,44 @@ class Pokemon {
                     self._type = ""
                 }
                 
-                print(self._type)
+                if let evolutionsArray = dict["evolutions"] as? Array<Dictionary<String, AnyObject>> where evolutionsArray.count > 0 {
+                    if let toEvolution = evolutionsArray[0]["to"] as? String {
+                        // Exclude mega evolution since we do not have asset for it
+                        if toEvolution.rangeOfString("mega") == nil {
+                            if let uri = evolutionsArray[0]["resource_uri"] as? String {
+                                let evolutionId = uri.stringByReplacingOccurrencesOfString("/api/v1/pokemon/", withString: "").stringByReplacingOccurrencesOfString("/", withString: "")
+                                
+                                self._nextEvolutionId = evolutionId
+                                self._nextEvolutionText = toEvolution
+                                
+                                if let level = evolutionsArray[0]["level"] as? Int {
+                                    self._nextEvolutionLevel = "\(level)"
+                                } else {
+                                    self._nextEvolutionLevel = ""
+                                }
+                            }
+                        }
+                    }
+                }
+    
+                if let descriptionsArray = dict["descriptions"] as? Array<Dictionary<String, String>> where descriptionsArray.count > 0 {
+                    if let url = descriptionsArray[0]["resource_uri"] {
+                        let nsurl = NSURL(string: "\(URL_BASE)\(url)")!
+                        Alamofire.request(Method.GET, nsurl).responseJSON(completionHandler: { (response: Response<AnyObject, NSError>) in
+                            let result = response.result
+                            
+                            if let dicResult = result.value as? Dictionary<String, AnyObject> {
+                                if let description = dicResult["description"] as? String {
+                                    self._description = description
+                                }
+                            }
+                            
+                            completed()
+                        })
+                    }
+                } else {
+                    self._description = ""
+                }
             }
         }
     }
