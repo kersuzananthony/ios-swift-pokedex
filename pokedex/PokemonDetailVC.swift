@@ -25,9 +25,18 @@ class PokemonDetailVC: UIViewController {
     @IBOutlet weak var nextEvoImage: UIImageView!
     @IBOutlet weak var evolutionLabel: UILabel!
     
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return UIStatusBarStyle.LightContent
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         nameLabel.text = pokemon.name.capitalizedString
+        mainImage.image = UIImage(named: "\(pokemon.pokedexId)")
+        
+        pokemon.downloadPokemonDetails { () -> () in
+            print("Completed!")
+        }
     }
     
     @IBAction func backButtonPressed(sender: UIButton) {
