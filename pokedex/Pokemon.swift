@@ -24,6 +24,7 @@ class Pokemon {
     private var _nextEvolutionId: String!
     private var _nextEvolutionLevel: String!
     private var _pokemonUrl: String!
+    private var _moves: Array<Move>! = [Move]()
     
     // Getters
     var name: String {
@@ -120,6 +121,10 @@ class Pokemon {
          return _nextEvolutionId
     }
     
+    var moves: Array<Move> {
+        return _moves
+    }
+    
     // Initializer
     init(name: String, pokedexId: Int) {
         self._name = name.capitalizedString
@@ -185,6 +190,7 @@ class Pokemon {
                     }
                 }
     
+                // Descriptions
                 if let descriptionsArray = dict["descriptions"] as? Array<Dictionary<String, String>> where descriptionsArray.count > 0 {
                     if let url = descriptionsArray[0]["resource_uri"] {
                         let nsurl = NSURL(string: "\(URL_BASE)\(url)")!
@@ -202,6 +208,49 @@ class Pokemon {
                     }
                 } else {
                     self._description = ""
+                }
+                
+                // Moves
+                if let moves = dict["moves"] as? [Dictionary<String, AnyObject>] where moves.count > 0 {
+                    
+                    var moveName = ""
+                    var moveDesc = ""
+                    var movePower = ""
+                    var moveAccuracy = ""
+                    
+                    for move in moves {
+                        
+                        if let url = move["resource_uri"] as? String {
+                            let nsurl = NSURL(string: "\(URL_BASE)\(url)")!
+                            Alamofire.request(.GET, nsurl).responseJSON { (response: Response<AnyObject, NSError>) in
+                                
+                                let moveResult = response.result
+                                
+                                if let moveDict = moveResult.value as? Dictionary<String, AnyObject> {
+                                    
+                                    if let name = moveDict["name"] as? String {
+                                        moveName = name
+                                    }
+                                    
+                                    if let desc = moveDict["description"] as? String {
+                                        moveDesc = desc
+                                    }
+                                    
+                                    if let power = moveDict["power"] as? Int {
+                                        movePower = "\(power)"
+                                    }
+                                    
+                                    if let accuracy = moveDict["accuracy"] as? Int {
+                                        moveAccuracy = "\(accuracy)"
+                                    }
+                                    
+                                    let move = Move(name: moveName, description: moveDesc, accuracy: moveAccuracy, power: movePower)
+                                    
+                                    self._moves.append(move)
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

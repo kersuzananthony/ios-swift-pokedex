@@ -12,6 +12,11 @@ class PokemonDetailVC: UIViewController {
 
     var pokemon: Pokemon!
     
+    @IBOutlet weak var biographieStackView: UIStackView!
+    @IBOutlet weak var evolutionStackView: UIStackView!
+    @IBOutlet weak var evolutionHeaderView: UIView!
+    @IBOutlet weak var movesTableView: UITableView!
+    
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var mainImage: UIImageView!
     @IBOutlet weak var descriptionLabel: UILabel!
@@ -39,6 +44,10 @@ class PokemonDetailVC: UIViewController {
         pokemon.downloadPokemonDetails { () -> () in
             self.updateUI()
         }
+        
+        self.movesTableView.delegate = self
+        self.movesTableView.dataSource = self
+        self.movesTableView.hidden = true
     }
     
     func updateUI() {
@@ -67,5 +76,44 @@ class PokemonDetailVC: UIViewController {
     
     @IBAction func backButtonPressed(sender: UIButton) {
         self.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    @IBAction func segmentControlPressed(sender: UISegmentedControl) {
+        if sender.selectedSegmentIndex == 0 {
+            movesTableView.hidden = true
+            biographieStackView.hidden = false
+            evolutionStackView.hidden = false
+            evolutionHeaderView.hidden = false
+        } else if sender.selectedSegmentIndex == 1 {
+            movesTableView.hidden = false
+            biographieStackView.hidden = true
+            evolutionStackView.hidden = true
+            evolutionHeaderView.hidden = true
+            movesTableView.reloadData()
+        }
+    }
+}
+
+extension PokemonDetailVC: UITableViewDelegate, UITableViewDataSource {
+    
+    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.pokemon.moves.count
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        if let moveCell = movesTableView.dequeueReusableCellWithIdentifier("MoveCell", forIndexPath: indexPath) as? MoveCell {
+            moveCell.configureCell(pokemon.moves[indexPath.row])
+            
+            return moveCell
+        } else {
+            let cell = MoveCell()
+            cell.configureCell(pokemon.moves[indexPath.row])
+            
+            return cell
+        }
     }
 }
