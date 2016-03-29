@@ -123,7 +123,7 @@ extension ViewController: UISearchBarDelegate {
         if searchBar.text == nil || searchBar.text == "" {
             isInSearchMode = false
             filteredPokemons = []
-            view.endEditing(true)
+            searchBar.performSelector(#selector(resignFirstResponder), withObject: nil, afterDelay: 0.1)
         } else {
             isInSearchMode = true
             let text = searchBar.text!.lowercaseString
@@ -136,10 +136,5 @@ extension ViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         view.endEditing(true)
     }
-    
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
-        view.endEditing(true)
-    }
-    
 }
 

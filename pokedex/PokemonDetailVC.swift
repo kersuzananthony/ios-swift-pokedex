@@ -41,9 +41,11 @@ class PokemonDetailVC: UIViewController {
         mainImage.image = UIImage(named: "\(pokemon.pokedexId)")
         currentEvoImage.image = UIImage(named: "\(pokemon.pokedexId)")
         
-        pokemon.downloadPokemonDetails { () -> () in
+        pokemon.downloadPokemonDetails({ () -> () in
             self.updateUI()
-        }
+        }, movesDownloadCompleted: { () -> () in
+            self.movesTableView.reloadData()
+        })
         
         self.movesTableView.delegate = self
         self.movesTableView.dataSource = self

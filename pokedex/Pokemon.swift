@@ -133,7 +133,7 @@ class Pokemon {
         self._pokemonUrl = "\(URL_BASE)\(URL_POKEMON)\(self._pokedexId)/"
     }
     
-    func downloadPokemonDetails(completed: DownloadComplete) {
+    func downloadPokemonDetails(completed: DownloadComplete, movesDownloadCompleted: DownloadComplete) {
         Alamofire.request(.GET, NSURL(string: self._pokemonUrl)!).responseJSON { (response: Response<AnyObject, NSError>) in
             let result = response.result
             
@@ -218,9 +218,8 @@ class Pokemon {
                     var movePower = ""
                     var moveAccuracy = ""
                     
-                    for move in moves {
-                        
-                        if let url = move["resource_uri"] as? String {
+                    for i in 0 ..< moves.count {
+                        if let url = moves[i]["resource_uri"] as? String {
                             let nsurl = NSURL(string: "\(URL_BASE)\(url)")!
                             Alamofire.request(.GET, nsurl).responseJSON { (response: Response<AnyObject, NSError>) in
                                 
@@ -247,6 +246,10 @@ class Pokemon {
                                     let move = Move(name: moveName, description: moveDesc, accuracy: moveAccuracy, power: movePower)
                                     
                                     self._moves.append(move)
+                                    
+                                    if i + 1 == moves.count {
+                                        movesDownloadCompleted()
+                                    }
                                 }
                             }
                         }
